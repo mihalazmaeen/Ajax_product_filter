@@ -20,6 +20,7 @@ require 'config.php';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
         integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-ui-Slider-Pips/1.11.5/jquery-ui-slider-pips.min.js" integrity="sha512-pVQ8Pa4StWWGWldpcG0HiT+wnRJOYi+6jI6wPxKpgCPSJBChB6huhHFYRFXyg3rhbrNs3L/WqpkSppC5oLsnJw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
 </head>
@@ -31,6 +32,12 @@ require 'config.php';
         <div class="col-lg-3">
             <h5>Filter Product</h5>
             <hr>
+            <h6 class="text-info">Price</h6>
+            <input type="hidden" id="hidden_minimum_price" value="0">
+            <input type="hidden" id="hidden_maximum_price" value="150000">
+            <p id="price_show">1000-150000</p>
+            <div id="price_range"></div>
+            <hr>
             <h6 class="text-info">Select Brand</h6>
             <ul class="list-group">
             <?php
@@ -41,7 +48,7 @@ while($row=$result->fetch_assoc()){
  <li class="list-group-item">
     <div class="form-check">
         <label class="form-check-label">
-            <input type="checkbox" class="form-check-input product_check" value="<?$row['brand'];?>" id="brand"><?= $row['brand'];?>
+            <input type="checkbox" class="form-check-input product_check" value="<?= $row['brand']; ?>" id="brand"><?= $row['brand'];?>
         </label>
     </div>
  </li> 
@@ -61,7 +68,7 @@ while($row=$result->fetch_assoc()){
  <li class="list-group-item">
     <div class="form-check">
         <label class="form-check-label">
-            <input type="checkbox" class="form-check-input product_check" value="<?$row['ram'];?>" id="ram"><?= $row['ram'];?>
+            <input type="checkbox" class="form-check-input product_check" value="<?= $row['ram']; ?>" id="ram"><?= $row['ram'];?>
         </label>
     </div>
  </li> 
@@ -81,7 +88,7 @@ while($row=$result->fetch_assoc()){
  <li class="list-group-item">
     <div class="form-check">
         <label class="form-check-label">
-            <input type="checkbox" class="form-check-input product_check" value="<?$row['storage'];?>" id="storage"><?= $row['storage'];?>
+            <input type="checkbox" class="form-check-input product_check" value="<?= $row['storage']; ?>" id="storage"><?= $row['storage'];?>
         </label>
     </div>
  </li> 
@@ -101,14 +108,14 @@ while($row=$result->fetch_assoc()){
  <li class="list-group-item">
     <div class="form-check">
         <label class="form-check-label">
-            <input type="checkbox" class="form-check-input product_check" value="<?$row['camera'];?>" id="camera"><?= $row['camera'];?>
+            <input type="checkbox" class="form-check-input product_check" value="<?= $row['camera'];?>" id="camera"><?= $row['camera'];?>
         </label>
     </div>
  </li> 
  <?php  
 }
 
-            ?>
+?>
 
             </ul>
         </div>
@@ -116,7 +123,7 @@ while($row=$result->fetch_assoc()){
             <h5 class="text-center" id="text-change">All Products</h5>
             <hr>
             <div class="text-center">
-                <img src="images/loader.gif" id="loader" width="200" style="display:none" alt="">
+                <img src="images/loader.gif" id="loader" width="200" style="display:none;" alt="">
             </div>
             <div class="row" id="result">
                 <?php
@@ -133,7 +140,7 @@ while ($row = $result->fetch_assoc()) {
                 <h6 style="margin-top:300px;" class="text-light bg-info text-center rounded p-2"><?= $row['pname']; ?></h6>
             </div>
             <div class="card-body">
-                <h4 class="card-title text-danger">Price: <?= number_format($row['price']); ?>-</h4>
+                <h4 class="card-title text-danger">Price: <?= number_format($row['price']); ?>/-</h4>
                 <p>
                 RAM: <?= $row['ram'];?><br>
                 Storage: <?= $row['storage'];?><br>
@@ -160,6 +167,8 @@ while ($row = $result->fetch_assoc()) {
         $(".product_check").click(function(){
             $("#loader").show();
             let action='data';
+            let minimum_price=$('#hidden_minimum_price').val();
+            let maximum_price=$('#hidden_maximum_price').val();
             let brand=get_filter_text('brand');
             let ram=get_filter_text('ram');
             let camera=get_filter_text('camera');
@@ -167,7 +176,7 @@ while ($row = $result->fetch_assoc()) {
             $.ajax({
                 url:'action.php',
                 method:'POST',
-                data:{action:action,brand:brand,ram:ram,camera:camera,storage:storage},
+                data:{action:action,minimum_price:minimum_price,maximum_price:maximum_price,brand:brand,ram:ram,camera:camera,storage:storage},
                 success:function(response){
                     $("#result").html(response);
                     $("#loader").hide();
@@ -185,6 +194,19 @@ while ($row = $result->fetch_assoc()) {
             });
             return filterData;
         }
+        $('#price_range').slider({
+            range:true,
+            min:1000,
+            max:150000,
+            values:[1000,150000],
+            step:500,
+            stop:function(event,ui){
+                $('#price_show').html(ui.values[0] + '-' + ui.values[1]);
+                $('#hidden_minimum_price').val(ui.values[0]);
+                $('#hidden_maximum_price').val(ui.values[1]);
+                get_filter_text();
+            }
+        });
     });
 
 </script>
